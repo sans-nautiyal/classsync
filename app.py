@@ -12,30 +12,115 @@ st.set_page_config(page_title="ClassSync", page_icon="📅", layout="wide")
 DATA_FILE = "data.json"
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 START_HOUR, END_HOUR = 9, 17          # college hours: 9:00 to 17:00
+LUNCH_HOUR = 13                       # 13:00 - 14:00 is never suggested
 
-teachers = {"t1": "Dr. Sharma", "t2": "Prof. Verma", "t3": "Dr. Singh"}
-sections = ["EE-1A", "EE-1B"]
+teachers = {
+    "t1": "Dr. Sharma",
+    "t2": "Prof. Verma",
+    "t3": "Dr. Singh",
+    "t4": "Dr. Mehta",
+    "t5": "Prof. Kapoor",
+}
+sections = ["EE-1A", "EE-1B", "EE-1C", "EE-1D", "EE-1E"]
 rooms = {
     "r1": {"name": "Room 101", "smart_board": True},
     "r2": {"name": "Room 102", "smart_board": False},
     "r3": {"name": "Room 201", "smart_board": True},
     "r4": {"name": "Room 202", "smart_board": False},
+    "r5": {"name": "Room 301", "smart_board": True},
+    "r6": {"name": "Room 302", "smart_board": False},
 }
 
-# start / end are hours in 24h format: 9 means 9:00
+# One line per class: (day, start hour, subject, teacher id, section, room id)
+# Each class is 1 hour long. Start hour is 24h format: 9 means 9:00, 14 means 2 PM.
+# To add a class, copy a line and change its values. Lunch break is 13:00 - 14:00.
+CLASSES = [
+    # ---- Monday ----
+    ("Monday", 9, "Maths", "t1", "EE-1A", "r1"),
+    ("Monday", 11, "Physics", "t2", "EE-1A", "r2"),
+    ("Monday", 14, "C Programming", "t3", "EE-1A", "r3"),
+    ("Monday", 10, "Physics", "t2", "EE-1B", "r2"),
+    ("Monday", 12, "C Programming", "t3", "EE-1B", "r3"),
+    ("Monday", 15, "Circuits", "t4", "EE-1B", "r4"),
+    ("Monday", 9, "C Programming", "t3", "EE-1C", "r3"),
+    ("Monday", 11, "Circuits", "t4", "EE-1C", "r4"),
+    ("Monday", 14, "English", "t5", "EE-1C", "r5"),
+    ("Monday", 10, "Circuits", "t4", "EE-1D", "r4"),
+    ("Monday", 12, "English", "t5", "EE-1D", "r5"),
+    ("Monday", 15, "Maths", "t1", "EE-1D", "r6"),
+    ("Monday", 9, "English", "t5", "EE-1E", "r5"),
+    ("Monday", 11, "Maths", "t1", "EE-1E", "r6"),
+    ("Monday", 14, "Physics", "t2", "EE-1E", "r1"),
+    # ---- Tuesday ----
+    ("Tuesday", 10, "Physics", "t2", "EE-1A", "r1"),
+    ("Tuesday", 12, "C Programming", "t3", "EE-1A", "r2"),
+    ("Tuesday", 15, "Circuits", "t4", "EE-1A", "r3"),
+    ("Tuesday", 9, "C Programming", "t3", "EE-1B", "r2"),
+    ("Tuesday", 11, "Circuits", "t4", "EE-1B", "r3"),
+    ("Tuesday", 14, "English", "t5", "EE-1B", "r4"),
+    ("Tuesday", 10, "Circuits", "t4", "EE-1C", "r3"),
+    ("Tuesday", 12, "English", "t5", "EE-1C", "r4"),
+    ("Tuesday", 15, "Maths", "t1", "EE-1C", "r5"),
+    ("Tuesday", 9, "English", "t5", "EE-1D", "r4"),
+    ("Tuesday", 11, "Maths", "t1", "EE-1D", "r5"),
+    ("Tuesday", 14, "Physics", "t2", "EE-1D", "r6"),
+    ("Tuesday", 10, "Maths", "t1", "EE-1E", "r5"),
+    ("Tuesday", 12, "Physics", "t2", "EE-1E", "r6"),
+    ("Tuesday", 15, "C Programming", "t3", "EE-1E", "r1"),
+    # ---- Wednesday ----
+    ("Wednesday", 9, "C Programming", "t3", "EE-1A", "r1"),
+    ("Wednesday", 11, "Circuits", "t4", "EE-1A", "r2"),
+    ("Wednesday", 14, "English", "t5", "EE-1A", "r3"),
+    ("Wednesday", 10, "Circuits", "t4", "EE-1B", "r2"),
+    ("Wednesday", 12, "English", "t5", "EE-1B", "r3"),
+    ("Wednesday", 15, "Maths", "t1", "EE-1B", "r4"),
+    ("Wednesday", 9, "English", "t5", "EE-1C", "r3"),
+    ("Wednesday", 11, "Maths", "t1", "EE-1C", "r4"),
+    ("Wednesday", 14, "Physics", "t2", "EE-1C", "r5"),
+    ("Wednesday", 10, "Maths", "t1", "EE-1D", "r4"),
+    ("Wednesday", 12, "Physics", "t2", "EE-1D", "r5"),
+    ("Wednesday", 15, "C Programming", "t3", "EE-1D", "r6"),
+    ("Wednesday", 9, "Physics", "t2", "EE-1E", "r5"),
+    ("Wednesday", 11, "C Programming", "t3", "EE-1E", "r6"),
+    ("Wednesday", 14, "Circuits", "t4", "EE-1E", "r1"),
+    # ---- Thursday ----
+    ("Thursday", 10, "Circuits", "t4", "EE-1A", "r1"),
+    ("Thursday", 12, "English", "t5", "EE-1A", "r2"),
+    ("Thursday", 15, "Maths", "t1", "EE-1A", "r3"),
+    ("Thursday", 9, "English", "t5", "EE-1B", "r2"),
+    ("Thursday", 11, "Maths", "t1", "EE-1B", "r3"),
+    ("Thursday", 14, "Physics", "t2", "EE-1B", "r4"),
+    ("Thursday", 10, "Maths", "t1", "EE-1C", "r3"),
+    ("Thursday", 12, "Physics", "t2", "EE-1C", "r4"),
+    ("Thursday", 15, "C Programming", "t3", "EE-1C", "r5"),
+    ("Thursday", 9, "Physics", "t2", "EE-1D", "r4"),
+    ("Thursday", 11, "C Programming", "t3", "EE-1D", "r5"),
+    ("Thursday", 14, "Circuits", "t4", "EE-1D", "r6"),
+    ("Thursday", 10, "C Programming", "t3", "EE-1E", "r5"),
+    ("Thursday", 12, "Circuits", "t4", "EE-1E", "r6"),
+    ("Thursday", 15, "English", "t5", "EE-1E", "r1"),
+    # ---- Friday ----
+    ("Friday", 9, "English", "t5", "EE-1A", "r1"),
+    ("Friday", 11, "Maths", "t1", "EE-1A", "r2"),
+    ("Friday", 14, "Physics", "t2", "EE-1A", "r3"),
+    ("Friday", 10, "Maths", "t1", "EE-1B", "r2"),
+    ("Friday", 12, "Physics", "t2", "EE-1B", "r3"),
+    ("Friday", 15, "C Programming", "t3", "EE-1B", "r4"),
+    ("Friday", 9, "Physics", "t2", "EE-1C", "r3"),
+    ("Friday", 11, "C Programming", "t3", "EE-1C", "r4"),
+    ("Friday", 14, "Circuits", "t4", "EE-1C", "r5"),
+    ("Friday", 10, "C Programming", "t3", "EE-1D", "r4"),
+    ("Friday", 12, "Circuits", "t4", "EE-1D", "r5"),
+    ("Friday", 15, "English", "t5", "EE-1D", "r6"),
+    ("Friday", 9, "Circuits", "t4", "EE-1E", "r5"),
+    ("Friday", 11, "English", "t5", "EE-1E", "r6"),
+    ("Friday", 14, "Maths", "t1", "EE-1E", "r1"),
+]
+
 DEFAULT_TIMETABLE = [
-    {"day": "Monday",    "start": 9,  "end": 10, "subject": "Maths",        "teacher_id": "t1", "section": "EE-1A", "room_id": "r1"},
-    {"day": "Monday",    "start": 10, "end": 11, "subject": "Physics",      "teacher_id": "t2", "section": "EE-1A", "room_id": "r2"},
-    {"day": "Monday",    "start": 9,  "end": 10, "subject": "C Programming", "teacher_id": "t2", "section": "EE-1B", "room_id": "r3"},
-    {"day": "Monday",    "start": 10, "end": 11, "subject": "Circuits",     "teacher_id": "t3", "section": "EE-1B", "room_id": "r4"},
-    {"day": "Monday",    "start": 11, "end": 12, "subject": "Maths",        "teacher_id": "t1", "section": "EE-1B", "room_id": "r1"},
-    {"day": "Tuesday",   "start": 9,  "end": 10, "subject": "Circuits",     "teacher_id": "t3", "section": "EE-1A", "room_id": "r4"},
-    {"day": "Tuesday",   "start": 9,  "end": 10, "subject": "Maths",        "teacher_id": "t1", "section": "EE-1B", "room_id": "r1"},
-    {"day": "Tuesday",   "start": 10, "end": 11, "subject": "Maths",        "teacher_id": "t1", "section": "EE-1A", "room_id": "r1"},
-    {"day": "Tuesday",   "start": 11, "end": 12, "subject": "Physics",      "teacher_id": "t2", "section": "EE-1B", "room_id": "r2"},
-    {"day": "Wednesday", "start": 9,  "end": 10, "subject": "C Programming", "teacher_id": "t2", "section": "EE-1A", "room_id": "r3"},
-    {"day": "Wednesday", "start": 10, "end": 11, "subject": "Circuits",     "teacher_id": "t3", "section": "EE-1B", "room_id": "r4"},
-    {"day": "Wednesday", "start": 11, "end": 12, "subject": "Physics",      "teacher_id": "t2", "section": "EE-1A", "room_id": "r2"},
+    {"day": d, "start": s, "end": s + 1, "subject": sub,
+     "teacher_id": t, "section": sec, "room_id": r}
+    for (d, s, sub, t, sec, r) in CLASSES
 ]
 
 
@@ -86,6 +171,8 @@ def find_free_slots(day, teacher_id, section, need_smart_board, ignore=None):
 
     for start in range(START_HOUR, END_HOUR):
         end = start + 1
+        if start == LUNCH_HOUR:
+            continue
 
         teacher_busy = any(c["teacher_id"] == teacher_id and
                            overlaps(start, end, c["start"], c["end"])
@@ -146,6 +233,17 @@ def weekly_grid(classes):
             cells[c["day"]][f"{h}:00"] = f"{c['subject']} | {c['section']} | {rooms[c['room_id']]['name']}"
     table = {d: [cells[d].get(h, "") for h in hours] for d in DAYS}
     return pd.DataFrame(table, index=hours)
+
+
+def class_rows(classes):
+    return [{
+        "Day": c["day"],
+        "Time": f"{c['start']}:00 - {c['end']}:00",
+        "Subject": c["subject"],
+        "Teacher": teachers[c["teacher_id"]],
+        "Section": c["section"],
+        "Room": room_name(c["room_id"]),
+    } for c in sort_classes(classes)]
 
 
 def room_finder(prefix):
